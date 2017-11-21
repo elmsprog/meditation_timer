@@ -1,8 +1,10 @@
-import pyaudio
+"""A simple meditation timer for python."""
+
 import time
 import tkinter
 from tkinter import ttk
 import wave
+import pyaudio
 
 
 class MedApp(ttk.Frame):
@@ -21,10 +23,10 @@ class MedApp(ttk.Frame):
         chunk = 1024
         wav_f = wave.open(wav_location, 'rb')
         wav_p = pyaudio.PyAudio()
-        stream = wav_p.open(format = wav_p.get_format_from_width(wav_f.getsampwidth()),
-                            channels = wav_f.getnchannels(),
-                            rate = wav_f.getframerate(), 
-                            output = True)
+        stream = wav_p.open(format=wav_p.get_format_from_width(wav_f.getsampwidth()),
+                            channels=wav_f.getnchannels(),
+                            rate=wav_f.getframerate(),
+                            output=True)
         data = wav_f.readframes(chunk)
 
         while data:
@@ -41,12 +43,16 @@ class MedApp(ttk.Frame):
 
     def med_timer(self):
         """Gets input and runs methods."""
+        self.start_button.config(text='Sit', command=lambda: self.sleep_timer(0), state='disabled')
+        self.start_button.update()
         if self.mins.get() == "":
             num_mins = 0
         else:
             num_mins = float(self.mins.get())
         self.sleep_timer(num_mins)
         self.play_wav("temple_bell.wav")
+        self.start_button.config(text='Start', command=self.med_timer, state='normal')
+        self.start_button.update()
 
     def init_gui(self):
         """Builds GUI."""
@@ -65,17 +71,17 @@ class MedApp(ttk.Frame):
         self.root.config(menu=self.menubar)
 
         self.mins = ttk.Entry(self, width=5)
-        self.mins.grid(column=1, row = 2)
+        self.mins.grid(column=1, row=2)
 
         self.start_button = ttk.Button(self, text='Start',
-                command=self.med_timer)
+                                       command=self.med_timer)
         self.start_button.grid(column=0, row=3, columnspan=4)
 
         # Labels that remain constant throughout execution.
         ttk.Label(self, text='Meditation Timer').grid(column=0, row=0,
-                columnspan=4)
+                  columnspan=4)
         ttk.Label(self, text='Minutes').grid(column=0, row=2,
-                sticky='w')
+                  sticky='w')
 
         for child in self.winfo_children():
             child.grid_configure(padx=5, pady=5)
@@ -84,9 +90,3 @@ if __name__ == '__main__':
     root = tkinter.Tk()
     MedApp(root)
     root.mainloop()
-
-
-'''BUGS
-    -pushing start repeatedly causes the program to queue up plays.
-    
-'''
