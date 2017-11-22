@@ -16,6 +16,7 @@ class MedApp(ttk.Frame):
 
     def on_quit(self):
         """ Exits program. """
+        self.t.cancel()
         quit()
 
     def play_wav(self):
@@ -47,8 +48,8 @@ class MedApp(ttk.Frame):
         else:
             num_mins = float(self.mins.get())
         time_in_seconds = num_mins * 60
-        t = Timer(time_in_seconds, self.play_wav)
-        t.start()
+        self.t = Timer(time_in_seconds, self.play_wav)
+        self.t.start()
 
     def init_gui(self):
         """ Builds GUI. """
