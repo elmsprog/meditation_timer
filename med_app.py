@@ -1,6 +1,6 @@
-"""A simple meditation timer for python."""
+""" A simple meditation timer for python. """
 
-import time
+from threading import Timer
 import tkinter
 from tkinter import ttk
 import wave
@@ -8,20 +8,20 @@ import pyaudio
 
 
 class MedApp(ttk.Frame):
-    """The app gui and functions."""
+    """ App, GUI, and functions. """
     def __init__(self, parent, *args, **kwargs):
         ttk.Frame.__init__(self, parent, *args, **kwargs)
         self.root = parent
         self.init_gui()
 
     def on_quit(self):
-        """Exits program."""
+        """ Exits program. """
         quit()
 
-    def play_wav(self, wav_location):
-        """Plays wave file."""
+    def play_wav(self):
+        """ Plays WAV file and restores button. """
         chunk = 1024
-        wav_f = wave.open(wav_location, 'rb')
+        wav_f = wave.open("temple_bell.wav", 'rb')
         wav_p = pyaudio.PyAudio()
         stream = wav_p.open(format=wav_p.get_format_from_width(wav_f.getsampwidth()),
                             channels=wav_f.getnchannels(),
@@ -35,39 +35,32 @@ class MedApp(ttk.Frame):
         stream.stop_stream()
         stream.close()
         wav_p.terminate()
-
-    def sleep_timer(self, time_in_minutes):
-        """Time delay."""
-        time_in_seconds = time_in_minutes * 60
-        time.sleep(time_in_seconds)
+        self.start_button.config(text='Start', state='normal')
+        self.start_button.update()
 
     def med_timer(self):
-        """Gets input and runs methods."""
-        self.start_button.config(text='Sit', command=lambda: self.sleep_timer(0), state='disabled')
+        """ Timer and disables button. """
+        self.start_button.config(text='Sit', state='disabled')
         self.start_button.update()
         if self.mins.get() == "":
             num_mins = 0
         else:
             num_mins = float(self.mins.get())
-        self.sleep_timer(num_mins)
-        self.play_wav("temple_bell.wav")
-        self.start_button.config(text='Start', command=self.med_timer, state='normal')
-        self.start_button.update()
+        time_in_seconds = num_mins * 60
+        t = Timer(time_in_seconds, self.play_wav)
+        t.start()
 
     def init_gui(self):
-        """Builds GUI."""
+        """ Builds GUI. """
         self.root.title('Meditation Timer')
         self.root.option_add('*tearOff', 'FALSE')
 
         self.grid(column=0, row=0, sticky='nsew')
 
         self.menubar = tkinter.Menu(self.root)
-
         self.menu_file = tkinter.Menu(self.menubar)
         self.menu_file.add_command(label='Exit', command=self.on_quit)
-
         self.menubar.add_cascade(menu=self.menu_file, label='File')
-
         self.root.config(menu=self.menubar)
 
         self.mins = ttk.Entry(self, width=5)
@@ -77,11 +70,10 @@ class MedApp(ttk.Frame):
                                        command=self.med_timer)
         self.start_button.grid(column=0, row=3, columnspan=4)
 
-        # Labels that remain constant throughout execution.
         ttk.Label(self, text='Meditation Timer').grid(column=0, row=0,
-                  columnspan=4)
+                                                      columnspan=4)
         ttk.Label(self, text='Minutes').grid(column=0, row=2,
-                  sticky='w')
+                                             sticky='w')
 
         for child in self.winfo_children():
             child.grid_configure(padx=5, pady=5)
